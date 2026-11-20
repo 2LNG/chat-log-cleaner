@@ -28,12 +28,15 @@
       removeRepeat: $('opt-repeat').checked,
       removeBlank: $('opt-blank').checked,
       groupSpeakers: $('opt-group').checked,
+      joinConsecutive: $('opt-join').checked,
       minRepeat: Number($('repeat-min').value)
     };
   }
 
   function refresh() {
     $('threshold-area').classList.toggle('muted', !$('opt-repeat').checked);
+    $('join-option').classList.toggle('muted', !$('opt-group').checked);
+    $('opt-join').disabled = !$('opt-group').checked;
     $('repeat-min').disabled = !$('opt-repeat').checked;
     if (originalText === null) return;
     const cleaned = window.ChatLogCleaner.cleanLog(originalText, getSettings());
@@ -43,7 +46,7 @@
     displayPreview($('after-preview'), outputText);
     $('before-count').textContent = stats.originalLines.toLocaleString('ko-KR') + '줄';
     $('after-count').textContent = stats.outputLines.toLocaleString('ko-KR') + '줄';
-    $('counts').textContent = '시간 표시 ' + stats.removedTimestamps.toLocaleString('ko-KR') + '개 제거 · 반복 메시지 ' + stats.removedNoise.toLocaleString('ko-KR') + '개 삭제 · 화자 구역 ' + stats.speakerGroups.toLocaleString('ko-KR') + '개 · 빈 줄 ' + stats.removedEmpty.toLocaleString('ko-KR') + '개 삭제';
+    $('counts').textContent = '시간 표시 ' + stats.removedTimestamps.toLocaleString('ko-KR') + '개 제거 · 반복 메시지 ' + stats.removedNoise.toLocaleString('ko-KR') + '개 삭제 · 화자 구역 ' + stats.speakerGroups.toLocaleString('ko-KR') + '개 · 메시지 합침 ' + stats.joinedMessages.toLocaleString('ko-KR') + '개 · 빈 줄 ' + stats.removedEmpty.toLocaleString('ko-KR') + '개 삭제';
     $('download').disabled = false;
     setStatus('옵션을 변경하면 미리보기가 즉시 갱신됩니다.');
   }
@@ -87,7 +90,7 @@
     dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.remove('dragging'); });
   }
   dropZone.addEventListener('drop', (event) => openFile(event.dataTransfer.files[0]));
-  for (const id of ['opt-time', 'opt-repeat', 'opt-blank', 'opt-group', 'repeat-min']) $(id).addEventListener('change', refresh);
+  for (const id of ['opt-time', 'opt-repeat', 'opt-blank', 'opt-group', 'opt-join', 'repeat-min']) $(id).addEventListener('change', refresh);
 
   $('download').addEventListener('click', () => {
     if (originalText === null) return;

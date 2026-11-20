@@ -28,13 +28,14 @@
   }
 
   function cleanLog(source, settings) {
-    const opts = Object.assign({ removeTime: true, removeRepeat: true, removeBlank: true, minRepeat: 1, groupSpeakers: true }, settings || {});
+    const opts = Object.assign({ removeTime: true, removeRepeat: true, removeBlank: true, minRepeat: 1, groupSpeakers: true, joinConsecutive: true }, settings || {});
     const minRepeat = Math.max(1, Number(opts.minRepeat) || 1);
     const normalized = String(source).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
     const lines = normalized.split('\n');
     const result = [];
-    const stats = { originalLines: lines.length, outputLines: 0, removedTimestamps: 0, removedNoise: 0, removedEmpty: 0, removedDateHeadings: 0, speakerGroups: 0 };
+    const stats = { originalLines: lines.length, outputLines: 0, removedTimestamps: 0, removedNoise: 0, removedEmpty: 0, removedDateHeadings: 0, speakerGroups: 0, joinedMessages: 0 };
     let currentSpeaker = null;
+    let lastMessageIndex = -1;
 
     for (const originalLine of lines) {
       let line = originalLine;
@@ -69,12 +70,23 @@
             result.push('[' + name + ']');
             stats.speakerGroups++;
             currentSpeaker = name;
+            lastMessageIndex = -1;
           }
-          result.push(speaker[2]);
+          const message = speaker[2].trim();
+          if (opts.joinConsecutive && lastMessageIndex >= 0 && message) {
+            // Keep intentional spacing inside each message; add one separator
+            // only between consecutive messages by the same speaker.
+            result[lastMessageIndex] = result[lastMessageIndex].trimEnd() + ' ' + message;
+            stats.joinedMessages++;
+          } else {
+            result.push(message);
+            lastMessageIndex = result.length - 1;
+          }
           continue;
         }
       }
       result.push(line);
+      lastMessageIndex = -1;
     }
     stats.outputLines = result.length;
     return { text: result.join('\n'), stats };
