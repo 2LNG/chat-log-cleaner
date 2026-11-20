@@ -7,6 +7,8 @@
   let originalText = null;
   let originalFilename = '';
   let outputText = '';
+  let candidates = [];
+  let selectedSpeakers = new Set();
 
   function setStatus(message, error) {
     $('status').textContent = message;
@@ -29,9 +31,53 @@
       removeBlank: $('opt-blank').checked,
       groupSpeakers: $('opt-group').checked,
       joinConsecutive: $('opt-join').checked,
-      minRepeat: Number($('repeat-min').value)
+      minRepeat: Number($('repeat-min').value),
+      selectedSpeakers: Array.from(selectedSpeakers)
     };
   }
+
+  function renderSpeakerChoices() {
+    const wrap = $('speaker-candidates');
+    wrap.replaceChildren();
+    const selectedCount = selectedSpeakers.size;
+    $('speaker-summary').textContent = originalText === null
+      ? 'TXT 파일을 선택하면 화자 후보가 표시됩니다'
+      : !candidates.length ? '화자 후보를 찾지 못했습니다'
+      : `화자 선택 (${selectedCount}명 / 후보 ${candidates.length}명)`;
+    $('speaker-hint').textContent = originalText === null
+      ? '실제 화자를 선택해야 [이름] 묶기와 메시지 필터링이 적용됩니다.'
+      : selectedCount ? '선택한 화자의 메시지만 화자 구역으로 묶습니다. 다른 텍스트는 그대로 둡니다.'
+      : '화자를 한 명 이상 선택하세요. 선택 전에는 화자 묶기와 반복 메시지 삭제가 적용되지 않습니다.';
+    for (const candidate of candidates) {
+      const label = document.createElement('label');
+      label.className = 'speaker-choice';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = selectedSpeakers.has(candidate.name);
+      checkbox.setAttribute('aria-label', candidate.name + ' 선택');
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) selectedSpeakers.add(candidate.name);
+        else selectedSpeakers.delete(candidate.name);
+        renderSpeakerChoices();
+        refresh();
+      });
+      const name = document.createElement('span');
+      name.className = 'speaker-name';
+      name.textContent = candidate.name;
+      const count = document.createElement('span');
+      count.className = 'candidate-count';
+      count.textContent = candidate.count.toLocaleString('ko-KR') + '회';
+      label.append(checkbox, name, count);
+      wrap.appendChild(label);
+    }
+  }
+  $('speaker-select-all').addEventListener('click', () => {
+    selectedSpeakers = new Set(candidates.map(candidate => candidate.name));
+    renderSpeakerChoices(); refresh();
+  });
+  $('speaker-select-none').addEventListener('click', () => {
+    selectedSpeakers.clear(); renderSpeakerChoices(); refresh();
+  });
 
   function refresh() {
     $('threshold-area').classList.toggle('muted', !$('opt-repeat').checked);
@@ -67,6 +113,9 @@
       try { decoded = new TextDecoder('utf-8', { fatal: true }).decode(buffer); }
       catch (_) { decoded = new TextDecoder('euc-kr').decode(buffer); }
       originalText = decoded;
+      candidates = window.ChatLogCleaner.findSpeakerCandidates(decoded);
+      selectedSpeakers.clear(); // Explicit opt-in avoids interpreting body text as speakers.
+      renderSpeakerChoices();
       originalFilename = file.name;
       $('file-name').textContent = file.name;
       $('file-size').textContent = niceSize(file.size);
@@ -78,6 +127,7 @@
     }
   }
 
+  renderSpeakerChoices();
   $('choose-file').addEventListener('click', (event) => { event.stopPropagation(); fileInput.click(); });
   $('change-file').addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', () => { openFile(fileInput.files[0]); fileInput.value = ''; });
