@@ -31,6 +31,7 @@
       removeBlank: $('opt-blank').checked,
       groupSpeakers: $('opt-group').checked,
       joinConsecutive: $('opt-join').checked,
+      limitRepeats: $('opt-limit-repeats').checked,
       minRepeat: Number($('repeat-min').value),
       selectedSpeakers: Array.from(selectedSpeakers)
     };
@@ -140,7 +141,7 @@
     dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.remove('dragging'); });
   }
   dropZone.addEventListener('drop', (event) => openFile(event.dataTransfer.files[0]));
-  for (const id of ['opt-time', 'opt-repeat', 'opt-blank', 'opt-group', 'opt-join', 'repeat-min']) $(id).addEventListener('change', refresh);
+  for (const id of ['opt-time', 'opt-repeat', 'opt-blank', 'opt-group', 'opt-join', 'opt-limit-repeats', 'repeat-min']) $(id).addEventListener('change', refresh);
 
   $('download').addEventListener('click', () => {
     if (originalText === null) return;

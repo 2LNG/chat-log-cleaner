@@ -29,4 +29,26 @@ assert.equal(isNoise('ㅎㅎ', 3), false);
 assert.equal(isNoise('ㅎㅎ', 2), true);
 assert.deepEqual(findSpeakerCandidates('사용자A : 첫째\n사용자B : 둘째\n사용자A : 셋째'),
   [{ name: '사용자A', count: 2 }, { name: '사용자B', count: 1 }]);
+assert.equal(cleanLog('사용자A : 시작\n하\nㅋ\nㅋ', { selectedSpeakers: ['사용자A'] }).text,
+  '[사용자A]\n시작 하 ㅋ ㅋ');
+assert.equal(cleanLog('사용자A : 하\nㅋ\nㅋ\n사용자B : 응답', { selectedSpeakers: speakers }).text,
+  '[사용자A]\n하 ㅋ ㅋ\n[사용자B]\n응답');
+assert.equal(cleanLog('[사용자A]\n하\nㅋ\nㅋ', { selectedSpeakers: ['사용자A'] }).text,
+  '[사용자A]\n하 ㅋ ㅋ');
+assert.equal(cleanLog('사용자A : 내용: 내부 구분\n이어지는 내용: 계속', { selectedSpeakers: ['사용자A'] }).text,
+  '[사용자A]\n내용: 내부 구분\n이어지는 내용: 계속');
+assert.equal(cleanLog('사용자A : 첫줄\n다음줄\n사용자A : 세번째', { selectedSpeakers: ['사용자A'], joinConsecutive: false }).text,
+  '[사용자A]\n첫줄\n다음줄\n세번째');
 console.log('All tests passed.');
+
+// v7 — repeated-character truncation (speaker names remain unchanged).
+assert.equal(cleanLog('사용자A : 하 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ', { selectedSpeakers: ['사용자A'] }).text, '[사용자A]\n하 ㅋㅋㅋㅋ');
+assert.equal(cleanLog('사용자A : ㅠㅠㅠㅠㅠ !!!!! ㅎㅎㅎㅎ ㅎㅎㅎㅎㅎ', { selectedSpeakers: ['사용자A'] }).text, '[사용자A]\nㅠㅠㅠㅠ !!!! ㅎㅎㅎㅎ ㅎㅎㅎㅎ');
+assert.equal(cleanLog('사용자A : 우와아아아아아', { selectedSpeakers: ['사용자A'] }).text, '[사용자A]\n우와아아아아');
+assert.equal(cleanLog('사용자A : ㅋㅋㅋㅋㅋㅋㅋ', { selectedSpeakers: ['사용자A'] }).text, '');
+assert.equal(cleanLog('사용자A : ㅋㅋㅋㅋㅋㅋㅋ', { selectedSpeakers: ['사용자A'], removeRepeat: false }).text, '[사용자A]\nㅋㅋㅋㅋ');
+assert.equal(cleanLog('사용자A : 하 ㅋㅋㅋㅋㅋ', { selectedSpeakers: ['사용자A'], limitRepeats: false }).text, '[사용자A]\n하 ㅋㅋㅋㅋㅋ');
+assert.equal(cleanLog('사용자A : !!!!!!!', { selectedSpeakers: ['사용자A'], groupSpeakers: false }).text, '사용자A : !!!!');
+assert.equal(cleanLog('미선택 : !!!!!', { selectedSpeakers: ['사용자A'] }).text, '미선택 : !!!!!');
+assert.equal(cleanLog('사용자A : 하\nㅋㅋㅋㅋㅋㅋㅋ', { selectedSpeakers: ['사용자A'] }).text, '[사용자A]\n하 ㅋㅋㅋㅋ');
+assert.equal(cleanLog('사용자A : 하 ㅋㅋㅋㅋㅋㅋㅋ\n사용자A : !!!!!', { selectedSpeakers: ['사용자A'] }).text, '[사용자A]\n하 ㅋㅋㅋㅋ !!!!');

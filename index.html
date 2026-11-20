@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f7fb">
   <meta name="description" content="카카오톡 TXT 대화 로그의 시간 표시와 무의미한 반복 메시지를 브라우저에서 안전하게 정리합니다.">
-  <title>대화 로그 정리기 v5 — 화자 선택 및 정확한 구분</title>
-  <link rel="stylesheet" href="./styles.css?v=4">
-  <script src="./cleaner.js?v=4" defer></script>
-  <script src="./app.js?v=4" defer></script>
+  <title>대화 로그 정리기 v7 — 반복 문자 4개 제한</title>
+  <link rel="stylesheet" href="./styles.css?v=6">
+  <script src="./cleaner.js?v=6" defer></script>
+  <script src="./app.js?v=6" defer></script>
 </head>
 <body>
   <div class="shell">
     <header class="site-header">
-      <div class="brand"><span class="brand-icon" aria-hidden="true">✦</span><span>대화 로그 정리기 <small style="font-size:.65em; opacity:.75">v5 · 화자 선택</small></span></div>
+      <div class="brand"><span class="brand-icon" aria-hidden="true">✦</span><span>대화 로그 정리기 <small style="font-size:.65em; opacity:.75">v7 · 반복 문자 줄이기</small></span></div>
       <div class="privacy-label"><span class="privacy-dot" aria-hidden="true"></span> 브라우저에서만 처리</div>
     </header>
 
@@ -59,7 +59,8 @@
             <p class="speaker-hint" id="speaker-hint">실제 화자를 선택해야 [이름] 묶기와 메시지 필터링이 적용됩니다.</p>
           </div>
           <label class="option"><input id="opt-group" type="checkbox" checked><span class="fake-check" aria-hidden="true"></span><span><strong>화자별로 연속 대화 묶기</strong><small>같은 사람이 연속으로 말하면 [이름] 아래 메시지를 모아요</small></span></label>
-          <label class="option" id="join-option"><input id="opt-join" type="checkbox" checked><span class="fake-check" aria-hidden="true"></span><span><strong>연속 메시지 한 줄로 합치기</strong><small>같은 화자의 메시지 사이에 공백을 넣고 한 줄로 연결</small></span></label>
+          <label class="option" id="join-option"><input id="opt-join" type="checkbox" checked><span class="fake-check" aria-hidden="true"></span><span><strong>연속 메시지 한 줄로 합치기</strong><small>같은 화자의 메시지와 본문 안의 줄바꿈을 공백으로 연결</small></span></label>
+          <label class="option"><input id="opt-limit-repeats" type="checkbox" checked><span class="fake-check" aria-hidden="true"></span><span><strong>연속 반복 문자 4개로 줄이기</strong><small>ㅋㅋㅋㅋㅋ, ㅠㅠㅠㅠㅠ, !!!!!처럼 같은 문자가 5개 이상 이어지면 4개만 유지</small></span></label>
           <label class="option"><input id="opt-blank" type="checkbox" checked><span class="fake-check" aria-hidden="true"></span><span><strong>빈 줄 제거</strong><small>불필요한 공백 줄 삭제</small></span></label>
           <div class="option-footer">본문에 포함된 콜론(:)은 화자 구분자로 해석하지 않아요. 선택한 화자만 처리합니다.</div>
         </div>
